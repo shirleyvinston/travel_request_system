@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Request Submitted</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <style>
+
+    .submitted-container{
+
+        margin-left:240px;
+
+        padding:40px;
+    }
+
+    .submitted-card{
+
+        background:rgba(255,255,255,0.10);
+
+        backdrop-filter:blur(12px);
+
+        border-radius:30px;
+
+        padding:50px;
+
+        text-align:center;
+
+        color:white;
+
+        box-shadow:
+            0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .submitted-title{
+
+        font-size:58px;
+
+        margin-bottom:20px;
+
+        font-weight:bold;
+    }
+
+    .submitted-subtitle{
+
+        font-size:22px;
+
+        margin-bottom:40px;
+
+        color:#d7faff;
+    }
+
+    .generated-box{
+
+        background:rgba(255,255,255,0.08);
+
+        border-radius:20px;
+
+        padding:30px;
+
+        margin-bottom:40px;
+    }
+
+    .generated-box h2{
+
+        margin-bottom:15px;
+    }
+
+    .generated-link{
+
+        color:#9ff3ff;
+
+        font-size:24px;
+
+        word-break:break-word;
+
+        font-weight:bold;
+    }
+
+    .button-row{
+
+        display:flex;
+
+        gap:20px;
+
+        flex-wrap:wrap;
+
+        justify-content:center;
+    }
+
+    .action-btn{
+
+        flex:1;
+
+        min-width:220px;
+
+        border:none;
+
+        padding:16px;
+
+        border-radius:14px;
+
+        font-size:17px;
+
+        font-weight:bold;
+
+        color:white;
+
+        cursor:pointer;
+
+        background:#00bcd4;
+
+        transition:0.3s;
+    }
+
+    .action-btn:hover{
+
+        background:#0097a7;
+    }
+
+    @media(max-width:900px){
+
+        .submitted-container{
+
+            margin-left:0;
+
+            padding:20px;
+        }
+
+        .submitted-card{
+
+            padding:30px;
+        }
+
+        .submitted-title{
+
+            font-size:38px;
+        }
+
+    }
+
+    </style>
+
+</head>
+
+<body>
+
+<!-- ===================================== -->
+<!-- SIDEBAR -->
+<!-- ===================================== -->
+
+<div class="sidebar">
+
+    <div class="sidebar-logo">
+
+        <img
+            src="{{ url_for('static', filename='images/logo.png') }}"
+            class="sidebar-image"
+            alt="Logo"
+        >
+
+    </div>
+
+    <ul>
+
+        <li onclick="window.location.href='/'">
+            Dashboard
+        </li>
+
+        <li onclick="window.location.href='/new-request'">
+            New Request
+        </li>
+
+        {% if session['role'] in ['admin', 'ceo'] %}
+
+        <li onclick="window.location.href='/analytics'">
+            Analytics
+        </li>
+
+        <li onclick="window.location.href='/history'">
+            History
+        </li>
+
+        <li onclick="window.location.href='/settings'">
+            Settings
+        </li>
+
+        {% endif %}
+
+        <li onclick="window.location.href='/profile'">
+            Profile
+        </li>
+
+        <li onclick="window.location.href='/logout'">
+            Logout
+        </li>
+
+    </ul>
+
+</div>
+
+<!-- ===================================== -->
+<!-- MAIN CONTENT -->
+<!-- ===================================== -->
+
+<div class="submitted-container">
+
+    <div class="submitted-card">
+
+        <!-- TITLE -->
+
+        <h1 class="submitted-title">
+
+            Request Submitted ✅
+
+        </h1>
+
+        <!-- SUBTITLE -->
+
+        <p class="submitted-subtitle">
+
+            Your CAMC / Downcall request
+            has been submitted successfully
+
+        </p>
+
+        <!-- GENERATED LINK -->
+
+        <div class="generated-box">
+
+            <h2>
+
+                Generated Request Link
+
+            </h2>
+
+            <div class="generated-link">
+
+                {{ generated_link }}
+
+            </div>
+
+        </div>
+
+        <!-- BUTTONS -->
+
+        <div class="button-row">
+
+            <!-- DASHBOARD -->
+
+            <button
+                class="action-btn"
+                onclick="window.location.href='/'"
+            >
+
+                Go To Dashboard
+
+            </button>
+
+            <!-- NEW REQUEST -->
+
+            <button
+                class="action-btn"
+                onclick="window.location.href='/new-request'"
+            >
+
+                Create Another Request
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

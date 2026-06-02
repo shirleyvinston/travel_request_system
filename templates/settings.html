@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Settings</title>
+
+    <!-- CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <style>
+
+    .region-grid{
+
+        align-items:start;
+    }
+
+    .site-info{
+
+        min-height:430px;
+    }
+
+    .site-info form{
+
+        display:flex;
+
+        flex-direction:column;
+
+        gap:10px;
+    }
+
+    .site-info h2{
+
+        margin-bottom:20px;
+
+        color:white;
+    }
+
+    </style>
+
+</head>
+
+<body>
+
+<!-- ===================================== -->
+<!-- SIDEBAR -->
+<!-- ===================================== -->
+
+<div class="sidebar">
+
+    <!-- LOGO -->
+
+    <div class="sidebar-logo">
+
+        <img
+            src="{{ url_for('static', filename='images/logo.png') }}"
+            class="sidebar-image"
+            alt="Company Logo"
+        >
+
+    </div>
+
+    <!-- MENU -->
+
+    <ul>
+
+        <!-- DASHBOARD -->
+
+        <li onclick="window.location.href='/'">
+            Dashboard
+        </li>
+
+        <!-- NEW REQUEST -->
+
+        <li onclick="window.location.href='/new-request'">
+            New Request
+        </li>
+
+        <!-- ANALYTICS -->
+
+        <li onclick="window.location.href='/analytics'">
+            Analytics
+        </li>
+
+        <!-- HISTORY -->
+
+        <li onclick="window.location.href='/history'">
+            History
+        </li>
+
+        <!-- SETTINGS -->
+
+        <li class="active-menu">
+            Settings
+        </li>
+
+        <!-- PROFILE -->
+
+        <li onclick="window.location.href='/profile'">
+            Profile
+        </li>
+
+        <!-- LOGOUT -->
+
+        <li onclick="window.location.href='/logout'">
+            Logout
+        </li>
+
+    </ul>
+
+</div>
+
+<!-- ===================================== -->
+<!-- MAIN CONTENT -->
+<!-- ===================================== -->
+
+<div class="dashboard-container">
+
+    <div class="container">
+
+        <!-- TITLE -->
+
+        <h1 class="title">
+            Settings
+        </h1>
+
+        <!-- SUBTITLE -->
+
+        <p class="subtitle">
+
+            Manage Employees, Projects, Regions & Substations
+
+        </p>
+
+        <!-- ===================================== -->
+        <!-- SETTINGS GRID -->
+        <!-- ===================================== -->
+
+        <div class="region-grid">
+
+            <!-- ===================================== -->
+            <!-- ADD REGION -->
+            <!-- ===================================== -->
+
+            <div class="site-info">
+
+                <h2>
+                    Add Region
+                </h2>
+
+                <form action="/add-region" method="POST">
+
+                    <label>
+                        Region Name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="region_name"
+                        required
+                    >
+
+                    <button type="submit">
+
+                        Add Region
+
+                    </button>
+
+                </form>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- ADD EMPLOYEE -->
+            <!-- ===================================== -->
+
+            <div class="site-info">
+
+                <h2>
+                    Add Employee
+                </h2>
+
+                <form action="/add-employee" method="POST">
+
+                    <label>
+                        Employee Code
+                    </label>
+
+                    <input
+                        type="text"
+                        name="emp_id"
+                        required
+                    >
+
+                    <label>
+                        Employee Name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="emp_name"
+                        required
+                    >
+
+                    <button type="submit">
+
+                        Add Employee
+
+                    </button>
+
+                </form>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- ADD PROJECT -->
+            <!-- ===================================== -->
+
+            <div class="site-info">
+
+                <h2>
+                    Add Project
+                </h2>
+
+                <form action="/add-project" method="POST">
+
+                    <label>
+                        Project Name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="project_name"
+                        required
+                    >
+
+                    <button type="submit">
+
+                        Add Project
+
+                    </button>
+
+                </form>
+
+            </div>
+
+            <!-- ===================================== -->
+            <!-- ADD SITE -->
+            <!-- ===================================== -->
+
+            <div class="site-info">
+
+                <h2>
+                    Add Substation
+                </h2>
+
+                <form action="/add-site" method="POST">
+
+                    <!-- REGION -->
+
+                    <label>
+                        Region
+                    </label>
+
+                    <select
+                        name="region_id"
+                        required
+                    >
+
+                        {% for region in regions %}
+
+                        <option value="{{ region.id }}">
+
+                            {{ region.region_name }}
+
+                        </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <!-- SUBSTATION -->
+
+                    <label>
+                        Substation Name
+                    </label>
+
+                    <input
+                        type="text"
+                        name="substation_name"
+                        required
+                    >
+
+                    <!-- STATE -->
+
+                    <label>
+                        State
+                    </label>
+
+                    <input
+                        type="text"
+                        name="state_name"
+                        required
+                    >
+
+                    <!-- ZONE -->
+
+                    <label>
+                        Zone
+                    </label>
+
+                    <input
+                        type="text"
+                        name="zone_name"
+                        required
+                    >
+
+                    <!-- SITE CODE -->
+
+                    <label>
+                        Site Code
+                    </label>
+
+                    <input
+                        type="text"
+                        name="site_code"
+                        required
+                    >
+
+                    <!-- BUTTON -->
+
+                    <button type="submit">
+
+                        Add Site
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

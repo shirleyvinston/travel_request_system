@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Travel Request Form</title>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:linear-gradient(135deg,#003b46,#0f6c7a,#4bb8cb);
+    min-height:100vh;
+}
+
+.main-container{
+    margin-left:260px;
+    padding:30px;
+}
+
+.form-card{
+    background:rgba(255,255,255,0.12);
+    padding:30px;
+    border-radius:25px;
+    backdrop-filter:blur(10px);
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+}
+
+h1,h2,h3{
+    color:white;
+    text-align:center;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+    margin-bottom:20px;
+}
+
+label{
+    color:white;
+    font-weight:bold;
+    display:block;
+    margin-bottom:8px;
+}
+
+input,
+select,
+textarea{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    font-size:15px;
+    box-sizing:border-box;
+}
+
+textarea{
+    resize:none;
+    height:120px;
+}
+
+.table-section{
+    margin-top:35px;
+    background:rgba(255,255,255,0.08);
+    padding:25px;
+    border-radius:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    background:white;
+    margin-top:15px;
+}
+
+th{
+    background:#c8eaf4;
+    padding:14px;
+    border:1px solid #ccc;
+}
+
+td{
+    border:1px solid #ccc;
+    padding:10px;
+}
+
+td input,
+td select{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+
+.add-btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    margin-top:18px;
+    background:#11b9d9;
+    color:white;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.remove-btn{
+    background:red;
+    color:white;
+    border:none;
+    padding:10px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.btn-row{
+    display:flex;
+    gap:20px;
+    margin-top:30px;
+}
+
+.btn{
+    flex:1;
+    padding:15px;
+    border:none;
+    border-radius:12px;
+    background:#008da6;
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.amount-box{
+    margin-top:35px;
+    background:rgba(0,0,0,0.18);
+    padding:20px;
+    border-radius:18px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.amount-value{
+    background:white;
+    padding:15px 25px;
+    border-radius:12px;
+    font-size:28px;
+    font-weight:bold;
+    color:#004b5c;
+}
+
+#page2{
+    display:none;
+}
+
+@media(max-width:1000px){
+
+.grid{
+    grid-template-columns:1fr;
+}
+
+.main-container{
+    margin-left:0;
+}
+
+table{
+    display:block;
+    overflow-x:auto;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+    <div class="sidebar-logo">
+
+        <img
+            src="{{ url_for('static', filename='images/logo.png') }}"
+            class="sidebar-image"
+        >
+
+    </div>
+
+    <ul>
+
+    <li onclick="window.location.href='/'">
+        Dashboard
+    </li>
+
+    <li class="active-menu">
+        New Request
+    </li>
+
+    {% if session['role'] in ['admin', 'ceo'] %}
+
+    <li onclick="window.location.href='/analytics'">
+        Analytics
+    </li>
+
+    <li onclick="window.location.href='/history'">
+        History
+    </li>
+
+    <li onclick="window.location.href='/settings'">
+        Settings
+    </li>
+
+    {% endif %}
+
+    <li onclick="window.location.href='/profile'">
+        Profile
+    </li>
+
+    <li onclick="window.location.href='/logout'">
+        Logout
+    </li>
+
+</ul>
+</div>
+
+<!-- MAIN -->
+
+<div class="main-container">
+
+<div class="form-card">
+
+<form
+    action="/submit"
+    method="POST"
+    onsubmit="return validatePage2()"
+>
+
+<!-- PAGE 1 -->
+
+<div id="page1">
+
+<h1>Submit Request</h1>
+
+<div class="grid">
+
+<div>
+
+<label>Employee ID</label>
+
+<input type="text" name="emp_id" value="{{ employee_data.emp_id }}" readonly>
+
+</div>
+
+<div>
+
+<label>Employee Name</label>
+
+<input type="text" name="emp_name" value="{{ employee_data.emp_name }}" readonly>
+
+</div>
+
+<div>
+
+<label>Project</label>
+
+<select name="project_name" required>
+
+<option value="">
+    Select Project
+</option>
+
+{% for project in projects %}
+
+<option value="{{ project.project_name }}">
+{{ project.project_name }}
+</option>
+
+{% endfor %}
+
+</select>
+
+</div>
+
+<div>
+
+<label>Site</label>
+
+<select
+    name="site_name"
+    id="siteDropdown"
+    onchange="toggleCustomSite()"
+    required
+>
+<option value="">
+    Select Site
+</option>
+{% for site in sites %}
+
+<option value="{{ site.substation_name }}">
+    {{ site.substation_name }}
+</option>
+
+{% endfor %}
+
+<option value="CUSTOM">
+    Custom Site
+</option>
+
+</select>
+
+<input
+    type="text"
+    id="customSiteInput"
+    name="custom_site"
+    placeholder="Enter Custom Site Name"
+    style="
+        display:none;
+        margin-top:12px;
+    "
+>
+
+</div>
+
+<div>
+
+<label>Request Date</label>
+
+<input type="date" id="request_date" name="request_date" readonly>
+
+</div>
+
+<div>
+
+<label>Departure Date</label>
+
+<input type="date" id="departure_date" name="departure_date" required>
+
+</div>
+
+<div>
+
+<label>Return Date</label>
+
+<input type="date" id="return_date" name="return_date" required>
+
+</div>
+
+<div>
+
+<label>Total Days</label>
+
+<input type="text" id="total_days" name="total_days" readonly>
+
+</div>
+
+</div>
+
+<div class="grid">
+
+<div>
+
+<label>Period</label>
+
+<select name="period_name" required>
+
+<option value="">Select Period</option>
+<option value="2026-2027">2026-2027</option>
+<option value="2027-2028">2027-2028</option>
+<option value="2028-2029">2028-2029</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>Quarter</label>
+
+<select name="quarter_name" required>
+
+<option value="">Select Quarter</option>
+<option value="Q1">Q1</option>
+<option value="Q2">Q2</option>
+
+</select>
+
+</div>
+
+</div>
+
+<label>Purpose</label>
+
+<select name="purpose" required>
+
+    <option value="">Select Purpose</option>
+
+    <option value="CAMC">CAMC</option>
+
+    <option value="Downcall">Downcall</option>
+
+    <option value="Installation">Installation</option>
+
+    <option value="Maintenance">Maintenance</option>
+
+</select>
+
+<label style="margin-top:20px;">Reason</label>
+
+<textarea
+    name="reason_text"
+    maxlength="500"
+    required
+></textarea>
+
+<div class="btn-row">
+
+<button type="button" class="btn" onclick="nextPage()">
+Next
+</button>
+
+</div>
+
+</div>
+
+<!-- PAGE 2 -->
+
+<div id="page2">
+
+<!-- TRAVEL -->
+
+<div class="table-section">
+
+<h2>TRAVELLING EXPENSES</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>Date</th>
+<th>From</th>
+<th>To</th>
+<th>Mode</th>
+<th>Persons</th>
+<th>Amount</th>
+<th>Remove</th>
+
+</tr>
+
+</thead>
+
+<tbody id="travelBody"></tbody>
+
+</table>
+
+<button type="button" class="add-btn" onclick="addTravelRow()">
++ Add Row
+</button>
+
+<h3 id="travelTotal">Travel Total : ₹ 0</h3>
+
+</div>
+
+<!-- ACCOMMODATION -->
+
+<div class="table-section">
+
+<h2>ACCOMMODATION EXPENSES</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>From</th>
+<th>To</th>
+<th>Stay At</th>
+<th>Persons</th>
+<th>Total Days</th>
+<th>Initial Amount</th>
+<th>Total Amount</th>
+<th>Remove</th>
+
+</tr>
+
+</thead>
+
+<tbody id="accommodationBody"></tbody>
+
+</table>
+
+<button type="button" class="add-btn" onclick="addAccommodationRow()">
++ Add Row
+</button>
+
+<h3 id="accommodationTotal">Accommodation Total : ₹ 0</h3>
+
+</div>
+
+<!-- BOARDING -->
+
+<div class="table-section">
+
+<h2>BOARDING / FOOD EXPENSES</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>From</th>
+<th>To</th>
+<th>Total Days</th>
+<th>Initial Amount</th>
+<th>Total Amount</th>
+<th>Remove</th>
+
+</tr>
+
+</thead>
+
+<tbody id="boardingBody"></tbody>
+
+</table>
+
+<button type="button" class="add-btn" onclick="addBoardingRow()">
++ Add Row
+</button>
+
+<h3 id="boardingTotal">Boarding Total : ₹ 0</h3>
+
+</div>
+
+<!-- CONVEYANCE -->
+
+<div class="table-section">
+
+<h2>CONVEYANCE EXPENSES</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>From</th>
+<th>To</th>
+<th>Total Days</th>
+<th>Initial Amount</th>
+<th>Total Amount</th>
+<th>Remove</th>
+
+</tr>
+
+</thead>
+
+<tbody id="conveyanceBody"></tbody>
+
+</table>
+
+<button type="button" class="add-btn" onclick="addConveyanceRow()">
++ Add Row
+</button>
+
+<h3 id="conveyanceTotal">Conveyance Total : ₹ 0</h3>
+
+</div>
+
+<!-- PER DIEM -->
+
+<div class="table-section">
+
+<h2>PER DIEM / JOURNEY ALLOWANCE</h2>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>From</th>
+<th>To</th>
+<th>Total Days</th>
+<th>Persons</th>
+<th>Initial Amount</th>
+<th>Total Amount</th>
+<th>Remove</th>
+
+</tr>
+
+</thead>
+
+<tbody id="perdiemBody"></tbody>
+
+</table>
+
+<button type="button" class="add-btn" onclick="addPerdiemRow()">
++ Add Row
+</button>
+
+<h3 id="perdiemTotal">Per Diem Total : ₹ 0</h3>
+
+</div>
+
+<div class="amount-box">
+
+<h2 style="margin:0;color:white;">AMOUNT REQUESTED</h2>
+
+<div class="amount-value" id="finalAmount">
+₹ 0
+</div>
+
+</div>
+
+<input type="hidden" name="amount_requested" id="amount_requested">
+
+<div class="btn-row">
+
+<button type="button" class="btn" onclick="backPage()">
+Back
+</button>
+
+<button type="submit" class="btn">
+Submit Request
+</button>
+
+</div>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+<script>
+
+const today = new Date().toISOString().split("T")[0];
+
+document.getElementById("request_date").value = today;
+
+document.getElementById("departure_date").min = today;
+document.getElementById("return_date").min = today;
+
+function nextPage(){
+
+    const page1 =
+        document.getElementById("page1");
+
+    const requiredFields =
+        page1.querySelectorAll("[required]");
+
+    for(let field of requiredFields){
+
+        if(!field.value){
+
+            field.reportValidity();
+            return;
+
+        }
+    }
+
+    document.getElementById("page1").style.display = "none";
+    document.getElementById("page2").style.display = "block";
+
+}
+
+function backPage(){
+
+document.getElementById("page2").style.display = "none";
+document.getElementById("page1").style.display = "block";
+
+}
+
+function calculateDays(){
+const depValue =
+    document.getElementById("departure_date").value;
+
+const retValue =
+    document.getElementById("return_date").value;
+
+if(depValue && retValue){
+
+    const dep = new Date(depValue);
+    const ret = new Date(retValue);
+
+    const diff =
+        (ret - dep)/(1000*60*60*24)+1;
+
+    if(diff > 0){
+
+        document.getElementById("total_days").value =
+            diff;
+    }
+
+    else{
+
+        alert("Return date cannot be before departure date");
+
+        document.getElementById("return_date").value = "";
+        document.getElementById("total_days").value = "";
+    }
+}
+
+}
+
+
+document.getElementById("departure_date").addEventListener("change",calculateDays);
+document.getElementById("return_date").addEventListener("change",calculateDays);
+function calculateRowDays(row, type){
+const from =
+    row.querySelector(`.${type}-from`).value;
+
+const to =
+    row.querySelector(`.${type}-to`).value;
+
+if(from && to){
+
+    if(new Date(to) >= new Date(from)){
+
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
+
+        const diffDays =
+            Math.ceil(
+                (toDate - fromDate) /
+                (1000 * 60 * 60 * 24)
+            ) + 1;
+
+        row.querySelector(`.${type}-days`).value =
+            diffDays > 0 ? diffDays : 0;
+
+        const initial =
+            parseFloat(
+                row.querySelector(`.${type}-initial`).value
+            ) || 0;
+
+        let total = diffDays * initial;
+
+if(type === "acc"){
+
+    const persons =
+        parseFloat(
+            row.querySelector('[name="acc_persons[]"]').value
+        ) || 1;
+
+total = total * persons;
+
+}
+
+
+        if(type === "perdiem"){
+
+            const persons =
+                parseFloat(
+                    row.querySelector(".perdiem-persons")?.value
+                ) || 1;
+
+            total = total * persons;
+        }
+
+        row.querySelector(`.${type}-amount`).value =
+            total;
+    }
+
+    else{
+
+        alert("To date cannot be before From date");
+
+        row.querySelector(`.${type}-to`).value = "";
+        row.querySelector(`.${type}-days`).value = "";
+        row.querySelector(`.${type}-amount`).value = "";
+    }
+}
+}
+
+function removeRow(button){
+button.closest("tr").remove();
+
+updateFinal();
+
+}
+
+
+
+function createAccommodationRow(){
+
+return `
+
+<tr>
+
+<td>
+<input
+    type="date"
+    min="${today}"
+    class="acc-from"
+    name="acc_from[]"
+    required
+
+    onchange="
+        calculateRowDays(this.closest('tr'), 'acc');
+        updateFinal();
+    "
+>
+</td>
+
+<td>
+<input
+    type="date"
+    min="${today}"
+    class="acc-to"
+    name="acc_to[]"
+    required
+
+    onchange="
+        calculateRowDays(this.closest('tr'), 'acc');
+        updateFinal();
+    "
+>
+</td>
+
+<td>
+<input
+    type="text"
+    name="acc_stay[]"
+    required
+    placeholder="Stay At"
+>
+</td>
+
+<td>
+<input
+    type="number"
+    name="acc_persons[]"
+    oninput="
+    calculateRowDays(this.closest('tr'), 'acc');
+    updateFinal();
+"
+    min="1"
+    required
+    placeholder="Persons"
+>
+</td>
+
+<td>
+<input
+    type="text"
+    class="acc-days"
+    name="acc_days[]"
+    readonly
+>
+</td>
+
+<td>
+<input
+    type="number"
+    class="acc-initial"
+    name="acc_initial[]"
+    min="0"
+    required
+
+    oninput="
+        calculateRowDays(this.closest('tr'), 'acc');
+        updateFinal();
+    "
+>
+</td>
+
+<td>
+<input
+    type="text"
+    class="acc-amount"
+    name="acc_amount[]"
+    readonly
+>
+</td>
+
+<td>
+<button
+    type="button"
+    class="remove-btn"
+    onclick="removeRow(this)"
+>
+X
+</button>
+</td>
+
+</tr>
+
+`;
+}
+function createExpenseRow(type){
+
+return `
+
+<tr>
+
+<td>
+<input
+    type="date"
+    min="${today}"
+    class="${type}-from"
+    name="${type}_from[]"
+    required
+
+    onchange="
+        calculateRowDays(this.closest('tr'), '${type}');
+        updateFinal();
+    "
+>
+</td>
+
+<td>
+<input
+    type="date"
+    min="${today}"
+    class="${type}-to"
+    name="${type}_to[]"
+    required
+
+    onchange="
+        calculateRowDays(this.closest('tr'), '${type}');
+        updateFinal();
+    "
+>
+</td>
+
+<td>
+<input
+    type="text"
+    class="${type}-days"
+    name="${type}_days[]"
+    readonly
+>
+</td>
+
+${type === "perdiem" ? `
+<td>
+<input
+    type="number"
+    class="perdiem-persons"
+    name="perdiem_persons[]"
+    min="1"
+    required
+    placeholder="Persons"
+
+    oninput="
+        calculateRowDays(this.closest('tr'), 'perdiem');
+        updateFinal();
+    "
+>
+</td>
+` : ""}
+
+<td>
+<input
+    type="number"
+    class="${type}-initial"
+    name="${type}_initial[]"
+    min="0"
+    required
+    oninput="
+        calculateRowDays(this.closest('tr'), '${type}');
+        updateFinal();
+    "
+>
+</td>
+
+<td>
+<input
+    type="text"
+    class="${type}-amount"
+    name="${type}_amount[]"
+    readonly
+>
+</td>
+
+<td>
+<button
+    type="button"
+    class="remove-btn"
+    onclick="removeRow(this)"
+>
+X
+</button>
+</td>
+
+</tr>
+
+`;
+
+}
+function validatePage2(){
+const page2 =
+    document.getElementById("page2");
+
+const requiredFields =
+    page2.querySelectorAll("[required]");
+
+for(let field of requiredFields){
+
+    if(!field.value){
+
+        field.reportValidity();
+        return false;
+    }
+}
+
+return true;
+
+}
+
+function addTravelRow(){
+
+    if(document.querySelectorAll("#travelBody tr").length >= 7){
+        alert("Maximum 7 rows allowed");
+        return;
+    }
+
+    document.getElementById("travelBody").innerHTML += `
+
+    <tr>
+
+    <td>
+    <input
+        type="date"
+        min="${today}"
+        name="travel_date[]"
+        required
+    >
+    </td>
+
+    <td>
+    <input type="text" name="travel_from[]" required>
+    </td>
+
+    <td>
+    <input type="text" name="travel_to[]" required>
+    </td>
+
+    <td>
+
+    <select name="travel_mode[]" required>
+
+<option value="">Select Mode</option>
+<option value="Airways">Airways</option>
+<option value="Railways">Railways</option>
+<option value="Bus">Bus</option>
+
+</select>
+
+    </td>
+
+    <td>
+    <input type="number" name="travel_persons[]" min="1" required>
+    </td>
+
+    <td>
+    <input
+        type="number"
+        class="travel-amount"
+        name="travel_amount[]"
+        min="0"
+        required
+
+        oninput="
+            updateTravelTotal();
+            updateFinal();
+        "
+    >
+    </td>
+
+    <td>
+    <button
+        type="button"
+        class="remove-btn"
+        onclick="removeRow(this)"
+    >
+    X
+    </button>
+    </td>
+
+    </tr>
+
+    `;
+
+    updateTravelTotal();
+    updateFinal();
+}
+
+function addAccommodationRow(){
+
+if(document.querySelectorAll("#accommodationBody tr").length >= 7){
+alert("Maximum 7 rows allowed");
+return;
+}
+
+document.getElementById("accommodationBody").innerHTML += createAccommodationRow();
+
+}
+
+function addBoardingRow(){
+
+if(document.querySelectorAll("#boardingBody tr").length >= 7){
+alert("Maximum 7 rows allowed");
+return;
+}
+
+document.getElementById("boardingBody").innerHTML += createExpenseRow("boarding");
+
+}
+
+function addConveyanceRow(){
+
+if(document.querySelectorAll("#conveyanceBody tr").length >= 7){
+alert("Maximum 7 rows allowed");
+return;
+}
+
+document.getElementById("conveyanceBody").innerHTML += createExpenseRow("conveyance");
+
+}
+
+function addPerdiemRow(){
+
+if(document.querySelectorAll("#perdiemBody tr").length >= 7){
+alert("Maximum 7 rows allowed");
+return;
+}
+
+document.getElementById("perdiemBody").innerHTML += createExpenseRow("perdiem");
+
+}
+
+function calculateSection(type,totalId){
+
+let total = 0;
+
+document.querySelectorAll(`#${type}Body tr`).forEach(row=>{
+
+const from = row.querySelector(`.${type}-from`)?.value;
+const to = row.querySelector(`.${type}-to`)?.value;
+const initial = parseFloat(row.querySelector(`.${type}-initial`)?.value)||0;
+
+if(from && to){
+
+const days =
+    parseFloat(
+        row.querySelector(`.${type}-days`).value
+    ) || 0;
+
+let amount = days * initial;
+
+if(type === "perdiem"){
+
+    const persons =
+        parseFloat(
+            row.querySelector(".perdiem-persons")?.value
+        ) || 1;
+
+amount = (days * initial) * persons;
+
+}
+
+
+row.querySelector(`.${type}-amount`).value =
+    amount;
+
+total += amount;
+
+}
+
+});
+
+document.getElementById(totalId).innerHTML =
+    totalId
+        .replace("Total", " Total")
+        .replace(/^./, str => str.toUpperCase())
+        + " : ₹ " + total;
+
+return total;
+
+}
+function updateTravelTotal() {
+
+    let total = 0;
+
+    document.querySelectorAll('.travel-amount').forEach(input => {
+
+        total += Number(input.value) || 0;
+
+    });
+
+    document.getElementById('travelTotal').innerText =
+        "Travel Total : ₹ " + total;
+}
+function calculateAccommodationTotal(){
+
+    let total = 0;
+
+    document.querySelectorAll(".acc-amount").forEach(input=>{
+
+        total += parseFloat(input.value) || 0;
+
+    });
+
+    document.getElementById("accommodationTotal").innerHTML =
+        `Accommodation Total : ₹ ${total}`;
+
+    return total;
+}
+function updateFinal(){
+
+let travelTotal = 0;
+
+document.querySelectorAll(".travel-amount").forEach(input=>{
+
+travelTotal += parseFloat(input.value) || 0;
+
+});
+
+let total = travelTotal;
+document.getElementById("travelTotal").innerHTML =
+`Travel Total : ₹ ${travelTotal}`;
+total += calculateAccommodationTotal();
+
+total += calculateSection("boarding","boardingTotal");
+
+total += calculateSection("conveyance","conveyanceTotal");
+
+total += calculateSection("perdiem","perdiemTotal");
+
+document.getElementById("finalAmount").innerHTML =
+`₹ ${total}`;
+
+document.getElementById("amount_requested").value =
+total;
+
+}
+
+addTravelRow();
+addAccommodationRow();
+addBoardingRow();
+addConveyanceRow();
+addPerdiemRow();
+function toggleCustomSite(){
+
+    const dropdown =
+        document.getElementById("siteDropdown");
+
+    const customInput =
+        document.getElementById("customSiteInput");
+
+    if(dropdown.value === "CUSTOM"){
+
+        customInput.style.display = "block";
+        customInput.required = true;
+
+    }
+
+    else{
+
+        customInput.style.display = "none";
+        customInput.required = false;
+
+    }
+
+}
+</script>
+</body>
+</html>

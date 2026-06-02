@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Login</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <style>
+
+    body{
+
+        margin:0;
+
+        min-height:100vh;
+
+        display:flex;
+
+        justify-content:center;
+
+        align-items:center;
+
+        overflow:hidden;
+    }
+
+    .login-container{
+
+        width:420px;
+
+        background:rgba(255,255,255,0.10);
+
+        backdrop-filter:blur(14px);
+
+        padding:45px;
+
+        border-radius:30px;
+
+        box-shadow:
+            0 10px 35px rgba(0,0,0,0.25);
+
+        position:relative;
+
+        z-index:2;
+    }
+
+    .logo-container{
+
+        text-align:center;
+
+        margin-bottom:20px;
+    }
+
+    .logo{
+
+        width:110px;
+
+        height:110px;
+
+        object-fit:contain;
+    }
+
+    .login-title{
+
+        color:white;
+
+        text-align:center;
+
+        font-size:52px;
+
+        font-weight:bold;
+
+        margin-bottom:35px;
+    }
+
+    .form-group{
+
+        margin-bottom:22px;
+    }
+
+    label{
+
+        color:white;
+
+        display:block;
+
+        margin-bottom:10px;
+
+        font-weight:bold;
+    }
+
+    input{
+
+        width:100%;
+
+        padding:14px;
+
+        border:none;
+
+        border-radius:14px;
+
+        font-size:16px;
+
+        box-sizing:border-box;
+
+        outline:none;
+    }
+
+    .login-btn{
+
+        width:100%;
+
+        margin-top:20px;
+
+        padding:15px;
+
+        border:none;
+
+        border-radius:14px;
+
+        background:#00bcd4;
+
+        color:white;
+
+        font-size:18px;
+
+        font-weight:bold;
+
+        cursor:pointer;
+
+        transition:0.3s;
+    }
+
+    .login-btn:hover{
+
+        background:#0097a7;
+    }
+
+    .signup-text{
+
+        margin-top:25px;
+
+        text-align:center;
+
+        color:white;
+
+        font-size:16px;
+    }
+
+    .signup-text a{
+
+        color:#9ff3ff;
+
+        text-decoration:none;
+
+        font-weight:bold;
+    }
+
+    .signup-text a:hover{
+
+        text-decoration:underline;
+    }
+
+    @media(max-width:500px){
+
+        .login-container{
+
+            width:90%;
+
+            padding:30px;
+        }
+
+        .login-title{
+
+            font-size:38px;
+        }
+
+    }
+
+    </style>
+
+</head>
+
+<body class="auth-page">
+
+<!-- ===================================== -->
+<!-- BACKGROUND -->
+<!-- ===================================== -->
+
+<div class="background-animation">
+
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+    <span></span>
+
+</div>
+
+<!-- ===================================== -->
+<!-- LOGIN CARD -->
+<!-- ===================================== -->
+
+<div class="login-container">
+
+    <!-- LOGO -->
+
+    <div class="logo-container">
+
+        <img
+            src="{{ url_for('static', filename='images/logo.png') }}"
+            class="logo"
+            alt="Company Logo"
+        >
+
+    </div>
+
+    <!-- TITLE -->
+
+    <div class="login-title">
+
+        Login
+
+    </div>
+
+    <!-- FORM -->
+
+    <form method="POST">
+
+        <!-- USERNAME -->
+
+        <div class="form-group">
+
+            <label>
+
+                Username
+
+            </label>
+
+            <input
+                type="text"
+                name="username"
+                required
+            >
+
+        </div>
+
+        <!-- PASSWORD -->
+
+        <div class="form-group">
+
+            <label>
+
+                Password
+
+            </label>
+
+            <input
+                type="password"
+                name="password"
+                required
+            >
+
+        </div>
+
+        <!-- BUTTON -->
+
+        <button
+            type="submit"
+            class="login-btn"
+        >
+
+            Login
+
+        </button>
+
+    </form>
+
+    <!-- SIGNUP -->
+
+    <div class="signup-text">
+
+        Don't have an account?
+
+        <a href="/signup">
+
+            Signup
+
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

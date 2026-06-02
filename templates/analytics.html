@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>Analytics Dashboard</title>
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}"
+>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+
+.main-container{
+    margin-left:240px;
+    padding:40px;
+}
+
+.page-title{
+    color:white;
+    font-size:58px;
+    font-weight:bold;
+    margin-bottom:40px;
+}
+
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:25px;
+    margin-bottom:40px;
+}
+
+.summary-card{
+    background:rgba(255,255,255,0.12);
+    backdrop-filter:blur(10px);
+    padding:30px;
+    border-radius:25px;
+    text-align:center;
+    color:white;
+}
+
+.summary-card h2{
+    margin-bottom:15px;
+}
+
+.summary-card p{
+    font-size:40px;
+    font-weight:bold;
+}
+
+.chart-card{
+    background:rgba(255,255,255,0.12);
+    backdrop-filter:blur(10px);
+    border-radius:25px;
+    padding:30px;
+    margin-bottom:40px;
+    min-height:450px;
+}
+
+canvas{
+    width:100% !important;
+    max-height:450px !important;
+}
+
+.filter-container{
+    display:flex;
+    gap:20px;
+    margin-bottom:30px;
+    flex-wrap:wrap;
+}
+
+.filter-container select,
+.filter-container button{
+
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    font-size:16px;
+}
+
+.filter-container button{
+
+    background:#00d4ff;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.chart-title{
+    color:white;
+    font-size:26px;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+@media(max-width:900px){
+
+.main-container{
+    margin-left:0;
+    padding:20px;
+}
+
+.page-title{
+    font-size:38px;
+}
+
+.chart-card{
+    min-height:500px;
+}
+
+canvas{
+    height:400px !important;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+    <div class="sidebar-logo">
+
+        <img
+            src="{{ url_for('static', filename='images/logo.png') }}"
+            class="sidebar-image"
+        >
+
+    </div>
+
+    <ul>
+
+        <li onclick="window.location.href='/'">
+            Dashboard
+        </li>
+
+        <li onclick="window.location.href='/new-request'">
+            New Request
+        </li>
+
+        <li class="active-menu">
+            Analytics
+        </li>
+
+        <li onclick="window.location.href='/history'">
+            History
+        </li>
+
+        <li onclick="window.location.href='/settings'">
+            Settings
+        </li>
+
+        <li onclick="window.location.href='/profile'">
+            Profile
+        </li>
+
+        <li onclick="window.location.href='/logout'">
+            Logout
+        </li>
+
+    </ul>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main-container">
+
+<div style="display:flex; justify-content:flex-end;">
+
+<button
+    onclick="downloadPDF()"
+    style="
+        width:220px;
+        margin-bottom:25px;
+        padding:14px;
+        border:none;
+        border-radius:12px;
+        background:#00d4ff;
+        color:black;
+        font-size:16px;
+        font-weight:bold;
+        cursor:pointer;
+    "
+>
+    📄 Download PDF Report
+</button>
+
+</div>
+
+<div id="analyticsContent">
+
+    <div class="page-title">
+        Analytics Dashboard 📊
+    </div>
+
+<div class="filter-container">
+
+    <!-- EMPLOYEE -->
+
+    <select id="employeeFilter">
+
+        <option value="ALL">
+            All Employees
+        </option>
+
+        {% for emp in employees %}
+
+        <option value="{{ emp.emp_name }}">
+            {{ emp.emp_name }}
+        </option>
+
+        {% endfor %}
+
+    </select>
+
+    <!-- PURPOSE -->
+
+    <select id="purposeFilter">
+
+        <option value="ALL">
+            All Purposes
+        </option>
+
+        <option value="CAMC">CAMC</option>
+        <option value="Downcall">Downcall</option>
+        <option value="Installation">Installation</option>
+        <option value="Maintenance">Maintenance</option>
+
+    </select>
+
+    <!-- TREND -->
+
+    <select id="trendFilter">
+
+        <option value="monthly">
+            Monthly
+        </option>
+
+        <option value="yearly">
+            Yearly
+        </option>
+
+    </select>
+
+</div>
+
+<!-- SUMMARY -->
+
+<div class="summary-grid">
+
+    <div class="summary-card">
+
+        <h2>Total Requests</h2>
+
+        <p>
+            {{ total_requests }}
+        </p>
+
+    </div>
+
+    <div class="summary-card">
+
+        <h2>Approved Requests</h2>
+
+        <p>
+            {{ approved_requests }}
+        </p>
+
+    </div>
+
+    <div class="summary-card">
+
+        <h2>Pending Requests</h2>
+
+        <p>
+            {{ pending_requests }}
+        </p>
+
+    </div>
+
+</div>
+
+<!-- EMPLOYEE CHART -->
+
+<div class="chart-card">
+
+    <div class="chart-title">
+        Employee Analytics
+    </div>
+
+    <canvas id="employeeChart"></canvas>
+
+</div>
+
+<!-- SITE CHART -->
+
+<div class="chart-card">
+
+    <div class="chart-title">
+        Site-wise Analytics
+    </div>
+
+    <canvas id="siteChart"></canvas>
+
+</div>
+
+<!-- TREND CHART -->
+
+<div class="chart-card">
+
+    <div class="chart-title">
+        Trend Analysis
+    </div>
+
+    <canvas id="monthlyChart"></canvas>
+
+</div>
+
+</div>
+
+<script>
+
+let employeeChart;
+let siteChart;
+let monthlyChart;
+
+// ==========================
+// DOWNLOAD PDF
+// ==========================
+
+async function downloadPDF(){
+
+    const { jsPDF } = window.jspdf;
+
+    // ==========================
+    // GET FILTER VALUES
+    // ==========================
+
+    const employee =
+        document.getElementById("employeeFilter").value;
+
+    const purpose =
+        document.getElementById("purposeFilter").value;
+
+    const trend =
+        document.getElementById("trendFilter").value;
+
+    // ==========================
+    // FETCH DATA
+    // ==========================
+
+    const response =
+        await fetch(
+            `/analytics-data?employee=${employee}&purpose=${purpose}&chart_type=${trend}`
+        );
+
+    const data = await response.json();
+
+    // ==========================
+    // CREATE PDF
+    // ==========================
+
+    const pdf =
+        new jsPDF("p","mm","a4");
+
+    let y = 20;
+
+    // ==========================
+    // PAGE DESIGN
+    // ==========================
+
+    pdf.setFillColor(0, 212, 255);
+
+    pdf.rect(
+        0,
+        0,
+        210,
+        25,
+        "F"
+    );
+
+    // ==========================
+    // TITLE
+    // ==========================
+
+    pdf.setFont(
+        "helvetica",
+        "bold"
+    );
+
+    pdf.setFontSize(24);
+
+    pdf.setTextColor(255,255,255);
+
+    pdf.text(
+        "Analytics Report",
+        65,
+        16
+    );
+
+    y = 40;
+
+    // ==========================
+    // FILTER SECTION
+    // ==========================
+
+    pdf.setFillColor(240,240,240);
+
+    pdf.roundedRect(
+        15,
+        y - 5,
+        180,
+        35,
+        3,
+        3,
+        "F"
+    );
+
+    pdf.setFontSize(15);
+
+    pdf.setTextColor(0,0,0);
+
+    pdf.setFont(
+        "helvetica",
+        "bold"
+    );
+
+    pdf.text(
+        "Selected Filters",
+        20,
+        y + 2
+    );
+
+    pdf.setFont(
+        "helvetica",
+        "normal"
+    );
+
+    y += 12;
+
+    pdf.text(
+        `Employee Name : ${employee}`,
+        25,
+        y
+    );
+
+    y += 8;
+
+    pdf.text(
+        `Purpose : ${purpose}`,
+        25,
+        y
+    );
+
+    y += 8;
+
+    pdf.text(
+        `Trend Type : ${trend}`,
+        25,
+        y
+    );
+
+    y += 20;
+    // ==========================
+    // EMPLOYEE ANALYTICS
+    // ==========================
+
+    pdf.setFont(
+        "helvetica",
+        "bold"
+    );
+
+    pdf.setFontSize(18);
+
+    pdf.text(
+        "Employee Analytics",
+        20,
+        y
+    );
+
+    y += 12;
+
+    pdf.setFontSize(13);
+
+    pdf.setFont(
+        "helvetica",
+        "normal"
+    );
+
+    // PURPOSE COUNTS
+
+    if(data.employee_purpose_counts){
+
+        Object.entries(
+            data.employee_purpose_counts
+        ).forEach(([key,value]) => {
+
+            pdf.text(
+                `${key} : ${value}`,
+                25,
+                y
+            );
+
+            y += 8;
+
+        });
+
+    }
+
+    y += 15;
+
+    // ==========================
+    // SITE-WISE ANALYTICS
+    // ==========================
+
+    pdf.setFont(
+        "helvetica",
+        "bold"
+    );
+
+    pdf.setFontSize(18);
+
+    pdf.text(
+        "Site-wise Analytics",
+        20,
+        y
+    );
+
+    y += 12;
+
+    pdf.setFontSize(13);
+
+    pdf.setFont(
+        "helvetica",
+        "normal"
+    );
+
+    // SITE COUNTS
+
+    if(data.site_counts){
+
+        Object.entries(
+            data.site_counts
+        ).forEach(([site,count]) => {
+
+            pdf.text(
+                `${site} : ${count}`,
+                25,
+                y
+            );
+
+            y += 8;
+
+            // NEW PAGE
+
+            if(y > 270){
+
+                pdf.addPage();
+
+                y = 20;
+            }
+
+        });
+
+    }
+
+    y += 15;
+
+    // ==========================
+    // TREND ANALYTICS
+    // ==========================
+
+    pdf.setFont(
+        "helvetica",
+        "bold"
+    );
+
+    pdf.setFontSize(18);
+
+    pdf.text(
+        "Trend Analytics",
+        20,
+        y
+    );
+
+    y += 12;
+
+    pdf.setFontSize(13);
+
+    pdf.setFont(
+        "helvetica",
+        "normal"
+    );
+
+    for(let i = 0; i < data.bar_labels.length; i++){
+
+        pdf.text(
+            `${data.bar_labels[i]} : ${data.bar_values[i]} Approved Requests`,
+            25,
+            y
+        );
+
+        y += 8;
+
+        // NEW PAGE
+
+        if(y > 270){
+
+            pdf.addPage();
+
+            y = 20;
+        }
+
+    }
+
+    // ==========================
+    // FOOTER
+    // ==========================
+
+    const totalPages =
+        pdf.internal.getNumberOfPages();
+
+    for(let i = 1; i <= totalPages; i++){
+
+        pdf.setPage(i);
+
+        pdf.setFontSize(10);
+
+        pdf.setTextColor(120);
+
+        pdf.text(
+            `Page ${i} of ${totalPages}`,
+            170,
+            290
+        );
+
+    }
+
+    // ==========================
+    // SAVE PDF
+    // ==========================
+
+    pdf.save("Analytics_Report.pdf");
+
+}
+// ==========================
+// LOAD ANALYTICS
+// ==========================
+
+async function loadAnalytics(){
+
+    try{
+
+        const employee =
+            document.getElementById("employeeFilter").value;
+
+        const purpose =
+            document.getElementById("purposeFilter").value;
+
+        const trend =
+            document.getElementById("trendFilter").value;
+
+        const response =
+            await fetch(
+                `/analytics-data?employee=${employee}&purpose=${purpose}&chart_type=${trend}`
+            );
+
+        if(!response.ok){
+            throw new Error("Server Error");
+        }
+
+        const data = await response.json();
+
+        const trendLabels = data.bar_labels;
+        const trendCounts = data.bar_values;
+
+        const siteLabels = data.pie_labels;
+        const siteCounts = data.pie_values;
+
+        if(trendLabels.length === 0){
+
+            alert("No approved requests found");
+
+            return;
+        }
+
+        // DESTROY OLD CHARTS
+
+        if(employeeChart){
+            employeeChart.destroy();
+        }
+
+        if(siteChart){
+            siteChart.destroy();
+        }
+
+        if(monthlyChart){
+            monthlyChart.destroy();
+        }
+
+        const colors = [
+
+            "#00d4ff",
+            "#66a5ad",
+            "#07575b",
+            "#003b46",
+            "#3dcfd3",
+            "#87d9e7",
+            "#4bb8cb",
+            "#0f6c7a",
+            "#0aa1b5",
+            "#6ee7f0"
+
+        ];
+
+        // =========================
+        // BAR CHART
+        // =========================
+
+        employeeChart = new Chart(
+            document.getElementById("employeeChart"),
+            {
+                type:"bar",
+
+                data:{
+                    labels:trendLabels,
+
+                    datasets:[{
+                        label:"Approved Requests",
+                        data:trendCounts,
+                        backgroundColor:"#7ff6ff",
+                        borderRadius:10
+                    }]
+                },
+
+                options:{
+                    responsive:true,
+                    maintainAspectRatio:false,
+
+                    plugins:{
+                        legend:{
+                            labels:{
+                                color:"white"
+                            }
+                        }
+                    },
+
+                    scales:{
+                        x:{
+                            ticks:{
+                                color:"white"
+                            }
+                        },
+
+                        y:{
+                            beginAtZero:true,
+
+                            ticks:{
+                                color:"white",
+                                stepSize:1
+                            }
+                        }
+                    }
+                }
+            }
+        );
+
+        // =========================
+        // PIE CHART
+        // =========================
+
+        siteChart = new Chart(
+            document.getElementById("siteChart"),
+            {
+                type:"pie",
+
+                data:{
+                    labels:siteLabels,
+
+                    datasets:[{
+                        data:siteCounts,
+
+                        backgroundColor:
+                            siteLabels.map((_, index) =>
+                                colors[index % colors.length]
+                            )
+                    }]
+                },
+
+                options:{
+                    responsive:true,
+                    maintainAspectRatio:false,
+
+                    plugins:{
+                        legend:{
+                            labels:{
+                                color:"white"
+                            }
+                        }
+                    }
+                }
+            }
+        );
+
+        // =========================
+        // LINE CHART
+        // =========================
+
+        monthlyChart = new Chart(
+            document.getElementById("monthlyChart"),
+            {
+                type:"line",
+
+                data:{
+                    labels:trendLabels,
+
+                    datasets:[{
+                        label:"Approved Requests",
+                        data:trendCounts,
+                        borderColor:"#ffffff",
+                        backgroundColor:"rgba(255,255,255,0.2)",
+                        fill:true,
+                        tension:0.4
+                    }]
+                },
+
+                options:{
+                    responsive:true,
+                    maintainAspectRatio:false,
+
+                    plugins:{
+                        legend:{
+                            labels:{
+                                color:"white"
+                            }
+                        }
+                    },
+
+                    scales:{
+                        x:{
+                            ticks:{
+                                color:"white"
+                            }
+                        },
+
+                        y:{
+                            beginAtZero:true,
+
+                            ticks:{
+                                color:"white",
+                                stepSize:1
+                            }
+                        }
+                    }
+                }
+            }
+        );
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+        alert("Analytics loading failed");
+    }
+}
+
+// ==========================
+// EVENT LISTENERS
+// ==========================
+
+document.getElementById("employeeFilter")
+    .addEventListener("change", loadAnalytics);
+
+document.getElementById("purposeFilter")
+    .addEventListener("change", loadAnalytics);
+
+document.getElementById("trendFilter")
+    .addEventListener("change", loadAnalytics);
+
+// INITIAL LOAD
+
+loadAnalytics();
+
+</script>
+
+</body>
+
+</html>

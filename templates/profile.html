@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Profile</title>
+
+    <!-- CSS -->
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+    <style>
+
+    .profile-container{
+
+        margin-left:240px;
+
+        padding:40px;
+    }
+
+    .profile-card{
+
+        background:rgba(255,255,255,0.10);
+
+        backdrop-filter:blur(12px);
+
+        border-radius:25px;
+
+        padding:35px;
+
+        box-shadow:
+            0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    .profile-title{
+
+        color:white;
+
+        font-size:52px;
+
+        margin-bottom:30px;
+
+        font-weight:bold;
+    }
+
+    .history-table{
+
+        width:100%;
+
+        border-collapse:collapse;
+
+        overflow:hidden;
+
+        border-radius:20px;
+    }
+
+    .history-table th{
+
+        background:rgba(255,255,255,0.15);
+
+        color:white;
+
+        padding:18px;
+
+        text-align:left;
+
+        font-size:17px;
+    }
+
+    .history-table td{
+
+        background:rgba(255,255,255,0.08);
+
+        color:white;
+
+        padding:18px;
+
+        border-bottom:
+            1px solid rgba(255,255,255,0.08);
+    }
+
+    .link-column{
+
+        width:70%;
+
+        word-break:break-word;
+    }
+
+    .status-column{
+
+        width:30%;
+
+        text-align:center;
+    }
+
+    .approved-status{
+
+        color:#00ff95;
+
+        font-weight:bold;
+
+        font-size:16px;
+    }
+
+    .declined-status{
+
+        color:#ff5e5e;
+
+        font-weight:bold;
+
+        font-size:16px;
+    }
+
+    .pending-status{
+
+        color:#ffd54f;
+
+        font-weight:bold;
+
+        font-size:16px;
+    }
+
+    .download-btn{
+
+        display:inline-block;
+
+        margin-top:10px;
+
+        padding:10px 14px;
+
+        background:#00bcd4;
+
+        color:white;
+
+        border-radius:10px;
+
+        text-decoration:none;
+
+        font-weight:bold;
+    }
+
+    .download-btn:hover{
+
+        background:#0097a7;
+    }
+
+    @media(max-width:900px){
+
+        .profile-container{
+
+            margin-left:0;
+
+            padding:20px;
+        }
+
+        .profile-title{
+
+            font-size:38px;
+        }
+
+        .history-table{
+
+            min-width:700px;
+        }
+
+    }
+
+    </style>
+
+</head>
+
+<body>
+
+<!-- ===================================== -->
+<!-- SIDEBAR -->
+<!-- ===================================== -->
+
+<div class="sidebar">
+
+    <!-- LOGO -->
+
+    <div class="sidebar-logo">
+
+        <img
+            src="{{ url_for('static', filename='images/logo.png') }}"
+            class="sidebar-image"
+            alt="Company Logo"
+        >
+
+    </div>
+
+    <!-- MENU -->
+
+    <ul>
+
+        <li onclick="window.location.href='/'">
+            Dashboard
+        </li>
+
+        <li onclick="window.location.href='/new-request'">
+            New Request
+        </li>
+
+        {% if session['role'] in ['ceo', 'admin'] %}
+
+        <li onclick="window.location.href='/analytics'">
+            Analytics
+        </li>
+
+        <li onclick="window.location.href='/history'">
+            History
+        </li>
+
+        <li onclick="window.location.href='/settings'">
+            Settings
+        </li>
+
+        {% endif %}
+
+        <li class="active-menu">
+            Profile
+        </li>
+
+        <li onclick="window.location.href='/logout'">
+            Logout
+        </li>
+
+    </ul>
+
+</div>
+
+<!-- ===================================== -->
+<!-- MAIN CONTENT -->
+<!-- ===================================== -->
+
+<div class="profile-container">
+
+    <div class="profile-card">
+
+        <!-- TITLE -->
+
+        <h1 class="profile-title">
+
+            My Travel Requests
+
+        </h1>
+
+        <!-- TABLE -->
+
+        <div class="table-container">
+
+            <table class="history-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th class="link-column">
+
+                            Generated Link
+
+                        </th>
+
+                        <th class="status-column">
+
+                            Status
+
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for row in requests_data %}
+
+                    <tr>
+
+                        <!-- GENERATED LINK -->
+
+                        <td class="link-column">
+
+                            <div>
+
+                                {{ row.generated_link }}
+
+                            </div>
+
+                            {% if row.pdf_file %}
+
+                            <a
+                                href="/download-pdf/{{ row.pdf_file }}"
+                                class="download-btn"
+                            >
+
+                                Download PDF
+
+                            </a>
+
+                            {% endif %}
+
+                        </td>
+
+                        <!-- STATUS -->
+
+                        <td class="status-column">
+
+
+{% if row.status == 'Approved' %}
+
+<span style="color:#00ff88;font-weight:bold;">
+    Approved ✅
+</span>
+
+{% elif row.status == 'Declined' %}
+
+<span style="color:#ff4d4d;font-weight:bold;">
+    Declined ❌
+</span>
+
+{% elif 'Query' in row.status %}
+
+<span style="color:orange;font-weight:bold;">
+    {{ row.status }} ❓
+</span>
+
+{% else %}
+
+<span style="color:gold;font-weight:bold;">
+    Pending ⏳
+</span>
+
+{% endif %}
+
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>

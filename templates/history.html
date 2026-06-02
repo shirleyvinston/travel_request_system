@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>History</title>
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}"
+>
+
+<style>
+
+.status-approved{
+    color:#00ff88;
+    font-weight:bold;
+}
+
+.status-declined{
+    color:#ff4d4d;
+    font-weight:bold;
+}
+
+.status-pending{
+    color:#ffd447;
+    font-weight:bold;
+}
+
+.action-buttons{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+.download-btn{
+    background:#0ea5b7;
+    color:white;
+    padding:10px 14px;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:bold;
+    display:inline-block;
+}
+
+.download-btn:hover{
+    opacity:0.9;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- ===================================== -->
+<!-- SIDEBAR -->
+<!-- ===================================== -->
+
+<div class="sidebar">
+
+    <div class="sidebar-logo">
+
+        <img
+            src="{{ url_for('static', filename='images/logo.png') }}"
+            class="sidebar-image"
+            alt="Company Logo"
+        >
+
+    </div>
+
+    <ul>
+
+        <!-- DASHBOARD -->
+
+        <li onclick="window.location.href='/'">
+            Dashboard
+        </li>
+
+        <!-- NEW REQUEST -->
+
+        <li onclick="window.location.href='/new-request'">
+            New Request
+        </li>
+
+        {% if session['role'] in ['admin', 'ceo'] %}
+
+<!-- ANALYTICS -->
+
+<li onclick="window.location.href='/analytics'">
+    Analytics
+</li>
+
+<!-- HISTORY -->
+
+<li class="active-menu">
+    History
+</li>
+
+<!-- SETTINGS -->
+
+<li onclick="window.location.href='/settings'">
+    Settings
+</li>
+
+{% endif %}
+        <!-- PROFILE -->
+
+        <li onclick="window.location.href='/profile'">
+            Profile
+        </li>
+
+        <!-- LOGOUT -->
+
+        <li onclick="window.location.href='/logout'">
+            Logout
+        </li>
+
+    </ul>
+
+</div>
+
+<!-- ===================================== -->
+<!-- MAIN CONTENT -->
+<!-- ===================================== -->
+
+<div class="analytics-container">
+
+    <h1 class="analytics-title">
+        Travel Request History
+    </h1>
+
+    <div class="table-container">
+
+        <table class="history-table">
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Employee</th>
+
+                    <th>Project</th>
+
+                    <th>Site</th>
+
+                    <th>Purpose</th>
+
+                    <th>Status</th>
+
+<th>Admin Approval</th>
+
+<th>CEO Approval</th>
+
+<th>PDF</th>
+
+                    <th>Actions</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for row in requests_data %}
+
+                <tr>
+
+                    <!-- ID -->
+
+                    <td>
+                        {{ row.id }}
+                    </td>
+
+                    <!-- EMPLOYEE -->
+
+                    <td>
+                        {{ row.emp_name }}
+                    </td>
+
+                    <!-- PROJECT -->
+
+                    <td>
+                        {{ row.project_name }}
+                    </td>
+
+                    <!-- SITE -->
+
+                    <td>
+                        {{ row.site_name }}
+                    </td>
+
+                    <!-- PURPOSE -->
+
+                    <td>
+                        {{ row.purpose }}
+                    </td>
+
+                    <!-- STATUS -->
+
+                    <td>
+
+    {% if row.status == 'Approved' %}
+
+        <span class="status-approved">
+            Approved ✅
+        </span>
+
+    {% elif row.status == 'Declined' %}
+
+        <span class="status-declined">
+            Declined ❌
+        </span>
+
+    {% elif 'Query' in row.status %}
+
+        <span style="color:orange;font-weight:bold;">
+    {{ row.status }} ❓
+</span>
+
+    {% else %}
+
+        <span class="status-pending">
+            Pending ⏳
+        </span>
+
+    {% endif %}
+
+</td>
+                    <!-- ADMIN APPROVAL -->
+
+<td>
+
+    {{ row.admin_approval }}
+
+</td>
+
+<!-- CEO APPROVAL -->
+
+<td>
+
+    {{ row.ceo_approval }}
+
+</td>
+                    <!-- PDF -->
+
+                    <td>
+
+                        <a
+                            href="/download-pdf/{{ row.pdf_file }}"
+                            class="download-btn"
+                        >
+                            Download PDF
+                        </a>
+
+                    </td>
+
+                    <!-- ACTIONS -->
+
+                    <td>
+
+                        <div class="action-buttons">
+
+    <a
+        href="/approve-request/{{ row.id }}"
+        class="approve-btn"
+    >
+        Approve
+    </a>
+
+    <a href="/query/{{ row.id }}">
+
+        <button
+            style="
+                background:orange;
+                color:white;
+                border:none;
+                padding:10px 18px;
+                border-radius:8px;
+                cursor:pointer;
+                font-weight:bold;
+            "
+        >
+            Query
+        </button>
+
+    </a>
+
+    <a
+        href="/decline-request/{{ row.id }}"
+        class="decline-btn"
+    >
+        Decline
+    </a>
+
+</div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
