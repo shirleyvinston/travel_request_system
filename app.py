@@ -18,9 +18,7 @@ from flask import (
     abort
 )
 from flask_mail import Mail, Message
-import mysql.connector
-from mysql.connector import pooling
-
+from database.db import get_db_connection
 from reportlab.platypus import (
     SimpleDocTemplate,
     Paragraph,
@@ -61,35 +59,6 @@ logging.basicConfig(
 
 if not os.path.exists("pdfs"):
     os.makedirs("pdfs")
-
-
-# =========================================
-# MYSQL CONNECTION
-# =========================================
-
-db_pool = pooling.MySQLConnectionPool(
-
-    pool_name="travel_pool",
-
-    pool_size=5,
-
-    host=os.getenv("DB_HOST"),
-
-    user=os.getenv("DB_USER"),
-
-    password=os.getenv("DB_PASSWORD"),
-
-    database=os.getenv("DB_NAME")
-
-)
-def get_db_connection():
-
-    db = db_pool.get_connection()
-
-    cursor = db.cursor(dictionary=True)
-
-    return db, cursor
-
 
 # =========================================
 # LOGIN
