@@ -1,4 +1,6 @@
 import os
+os.makedirs("uploads", exist_ok=True)
+os.makedirs("pdfs", exist_ok=True)
 import logging
 from dotenv import load_dotenv
 from flask import (
